@@ -1,7 +1,7 @@
 
 
 FILENAME = "program.vms"
-OUTPUT_FILENAME = "compiled.vmo"
+OUTPUT_FILENAME = "compiled.bin"
 
 instrutctionsDict = {
     "add": {
@@ -52,7 +52,16 @@ instrutctionsDict = {
             "uint8_t",
             "int32_t"
         ]},
+    "printregs": {
+        "code": 0x50,
+        "arguments": 0,
+        "argumentTypes": [
+        ]},
 }
+
+class program(object):
+    def load(self, inputText):
+
 
 output = bytearray()
 
@@ -61,16 +70,16 @@ def convertArguments(args, argTypes, output):
         argType = argTypes[k]
 
         if argType == "uint8_t":
-                tempArg = int(arg)
+                tempArg = int(arg,0)
                 output.extend(bytes([tempArg]))
         elif argType == "uint16_t":
-                tempArg = int(arg)
+                tempArg = int(arg,0)
                 output.extend(bytes([tempArg % 256, (tempArg >> 8) % 256]))
         elif argType == "uint32_t":
-                tempArg = int(arg)
+                tempArg = int(arg,0)
                 output.extend(bytes([tempArg % 256, (tempArg >> 8) % 256, (tempArg >> 16) % 256, (tempArg >> 24) % 256]))
         elif argType == "int32_t":
-                tempArg = int(arg)
+                tempArg = int(arg,0)
                 output.extend(bytes([tempArg % 256, (tempArg >> 8) % 256, (tempArg >> 16) % 256, (tempArg >> 24) % 256]))
 
 
@@ -85,7 +94,7 @@ with open(FILENAME, 'r') as f:
         lineData = line.split(" ")
 
         instrName = lineData[0].strip()
-        instruction = instrutctionsDict.get(instrName)
+        instruction = instrutctionsDict.get(instrName.lower())
         if instruction is None:
             print("Invalid instruction: \"" + instrName + "\" at line: " + str(lineNumber))
         args = lineData[1:]
@@ -98,7 +107,11 @@ with open(FILENAME, 'r') as f:
         output.extend(bytes([instruction.get("code")]))
         tempOutput = bytearray()
         convertArguments(args, instruction.get("argumentTypes"), tempOutput)
+        output.extend(tempOutput)
 
         lineNumber += 1
 
 print (output)
+
+with open(OUTPUT_FILENAME, 'wb') as f:
+    f.write(output)

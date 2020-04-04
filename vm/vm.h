@@ -40,10 +40,11 @@ typedef struct {
 #define INS_MUL 0x44
 #define INS_POW 0x45
 
-typedef struct
-    {
-        uint32_t io[VM_IO_DATA];
-    } S_VMIOData;
+#define INS_PRINT_REGS 0x50
+
+typedef struct{
+    uint32_t io[VM_IO_DATA];
+} S_VMIOData;
 
 typedef uint16_t PROGRAM_ID;
 
@@ -100,6 +101,8 @@ ERR_STATUS VM_ENGINE(S_VM *vm,
                      PROGRAM_ID programID,
                      S_VMIOData *input,
                      S_VMIOData *output);
+
+S_VM* VM_Init();
 
 #define BREAK_AND_SET_ERROR(var, code) {var = code; break;}
 

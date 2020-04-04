@@ -102,6 +102,30 @@ static ERR_STATUS VM_InstructionDiv(S_InsMath3Ops *arguments, S_VMRegisters *reg
     return VM_ERR_SUCCESS;
 }
 
+VM_InstructionPrintRegs(S_VMRegisters *registers)
+{
+    if(registers == nullptr)
+    {
+        return VM_ERR_INVALID_PTR;
+    }
+
+    printf("Registers:\r\n");
+
+    printf(" TEMPORARY\r\n");
+    for(int k=0; k<VM_REGISTERS; k++)
+    {
+        printf("  0x%02x: 0x%08x\r\n", k, registers->temp[k]);
+    }
+
+    printf("\r\n"
+           "PERSISTENT\r\n");
+    for(int k=0; k<VM_REGISTERS; k++)
+    {
+        printf("  0x%02x: 0x%08x\r\n", k, registers->pers[k]);
+    }
+    return VM_ERR_SUCCESS;
+}
+
 ERR_STATUS VM_ENGINE(S_VM *vm,
                      PROGRAM_ID programID,
                      S_VMIOData *input,
@@ -155,6 +179,11 @@ ERR_STATUS VM_ENGINE(S_VM *vm,
             pc += (uint16_t)(sizeof(instruction->code) + sizeof(S_InsMath3Ops));
             break;
 
+        case INS_PRINT_REGS:
+            vmErrCode = VM_InstructionPrintRegs(&vm->regs);
+            pc += (uint16_t)(sizeof(instruction->code));
+            break;
+
         default:
             vmErrCode = VM_ERR_INS_NOT_FOUND;
         }
@@ -172,4 +201,11 @@ ERR_STATUS VM_ENGINE(S_VM *vm,
     }
 
     return VM_ERR_SUCCESS;
+}
+
+
+S_VM* VM_Init()
+{
+    S_VM *vm = (S_VM*) calloc(sizeof(S_VM), 1);
+    return vm;
 }
