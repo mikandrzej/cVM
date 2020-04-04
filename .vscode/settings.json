@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "vm.h": "c",
+        "stdint.h": "c",
+        "errors.h": "c"
+    }
+}

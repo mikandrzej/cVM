@@ -1,0 +1,30 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            
+            "type": "shell",
+            "label": "gcc.exe build main.c",
+            "command": "C:\\Strawberry\\c\\bin\\gcc.exe",
+            "args": [
+                "-g",
+                "${workspaceFolder}\\main.c",
+                "-g",
+                "${workspaceFolder}\\vm\\vm.c",
+                "-o",
+                "${workspaceFolder}\\main.exe"
+            ],
+            "options": {
+                "cwd": "C:\\Strawberry\\c\\bin"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        }
+    ],
+    
+}

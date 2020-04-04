@@ -1,0 +1,17 @@
+#include <stdint.h>
+
+
+#define RETURN_ON_ERROR(var) {if(var) return var;}
+
+#define VM_ERR_PREFIX 0x10000
+#define VM_ERR_BUILDER(x) (VM_ERR_PREFIX + (x))
+
+#define VM_ERR_SUCCESS 0
+#define VM_ERR_DIVISION VM_ERR_BUILDER(0x01)
+#define VM_ERR_OVERFLOW VM_ERR_BUILDER(0x02)
+#define VM_ERR_PROG_NOT_FOUND VM_ERR_BUILDER(0x03)
+#define VM_ERR_INS_NOT_FOUND VM_ERR_BUILDER(0x04)
+#define VM_ERR_INS_ARG_OUT_OF_RANGE VM_ERR_BUILDER(0x05)
+#define VM_ERR_MATH_DIV_BY_0 VM_ERR_BUILDER(0x06)
+
+typedef uint32_t ERR_STATUS;
