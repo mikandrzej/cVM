@@ -1,160 +1,12 @@
 #include "vm.h"
+#include "functions.h"
 #include <stdio.h>
 #include <stdlib.h>
 
-static ERR_STATUS VM_InstructionAdd(S_InsMath3Ops *arguments, S_VMRegisters *registers)
+S_VM* VM_Init()
 {
-    if (arguments->regA >= VM_REGISTERS)
-    {
-        return VM_ERR_INS_ARG_OUT_OF_RANGE;
-    }
-
-    if (arguments->regB != 0xFF)
-    { //a regB to regA
-        if (arguments->regB >= VM_REGISTERS)
-        {
-            return VM_ERR_INS_ARG_OUT_OF_RANGE;
-        }
-        *((int32_t *)&registers->temp[arguments->regA]) += *((int32_t *)&registers->temp[arguments->regB]);
-    }
-    else
-    { //const value to regA
-        *((int32_t *)&registers->temp[arguments->regA]) += arguments->cnst;
-    }
-
-    return VM_ERR_SUCCESS;
-}
-
-static ERR_STATUS VM_InstructionSub(S_InsMath3Ops *arguments, S_VMRegisters *registers)
-{
-    if (arguments->regA >= VM_REGISTERS)
-    {
-        return VM_ERR_INS_ARG_OUT_OF_RANGE;
-    }
-
-    if (arguments->regB != 0xFF)
-    { //regB to regA
-        if (arguments->regB >= VM_REGISTERS)
-        {
-            return VM_ERR_INS_ARG_OUT_OF_RANGE;
-        }
-        *((int32_t *)&registers->temp[arguments->regA]) -= *((int32_t *)&registers->temp[arguments->regB]);
-    }
-    else
-    { //const value to regA
-        *((int32_t *)&registers->temp[arguments->regA]) -= arguments->cnst;
-    }
-
-    return VM_ERR_SUCCESS;
-}
-
-static ERR_STATUS VM_InstructionMul(S_InsMath3Ops *arguments, S_VMRegisters *registers)
-{
-    if (arguments->regA >= VM_REGISTERS)
-    {
-        return VM_ERR_INS_ARG_OUT_OF_RANGE;
-    }
-
-    if (arguments->regB != 0xFF)
-    { //regB to regA
-        if (arguments->regB >= VM_REGISTERS)
-        {
-            return VM_ERR_INS_ARG_OUT_OF_RANGE;
-        }
-        *((int32_t *)&registers->temp[arguments->regA]) *= *((int32_t *)&registers->temp[arguments->regB]);
-    }
-    else
-    { //const value to regA
-        *((int32_t *)&registers->temp[arguments->regA]) *= arguments->cnst;
-    }
-
-    return VM_ERR_SUCCESS;
-}
-
-static ERR_STATUS VM_InstructionDiv(S_InsMath3Ops *arguments, S_VMRegisters *registers)
-{
-    if (arguments->regA >= VM_REGISTERS)
-    {
-        return VM_ERR_INS_ARG_OUT_OF_RANGE;
-    }
-
-    if (arguments->regB != 0xFF)
-    { //regB to regA
-        if (arguments->regB >= VM_REGISTERS)
-        {
-            return VM_ERR_INS_ARG_OUT_OF_RANGE;
-        }
-        if (registers->temp[arguments->regB] == 0)
-        {
-            return VM_ERR_MATH_DIV_BY_0;
-        }
-        *((int32_t *)&registers->temp[arguments->regA]) /= *((int32_t *)&registers->temp[arguments->regB]);
-    }
-    else
-    { //const value to regA
-        if (arguments->cnst == 0)
-        {
-            return VM_ERR_MATH_DIV_BY_0;
-        }
-        *((int32_t *)&registers->temp[arguments->regA]) /= arguments->cnst;
-    }
-
-    return VM_ERR_SUCCESS;
-}
-
-static ERR_STATUS VM_InstructionMod(S_InsMath3Ops *arguments, S_VMRegisters *registers)
-{
-    if (arguments->regA >= VM_REGISTERS)
-    {
-        return VM_ERR_INS_ARG_OUT_OF_RANGE;
-    }
-
-    if (arguments->regB != 0xFF)
-    { //regB to regA
-        if (arguments->regB >= VM_REGISTERS)
-        {
-            return VM_ERR_INS_ARG_OUT_OF_RANGE;
-        }
-        if (registers->temp[arguments->regB] == 0)
-        {
-            return VM_ERR_MATH_DIV_BY_0;
-        }
-        *((int32_t *)&registers->temp[arguments->regA]) %= *((int32_t *)&registers->temp[arguments->regB]);
-    }
-    else
-    { //const value to regA
-        if (arguments->cnst == 0)
-        {
-            return VM_ERR_MATH_DIV_BY_0;
-        }
-        *((int32_t *)&registers->temp[arguments->regA]) %= arguments->cnst;
-    }
-
-    return VM_ERR_SUCCESS;
-}
-
-VM_InstructionPrintRegs(S_VMRegisters *registers)
-{
-    if(registers == nullptr)
-    {
-        return VM_ERR_INVALID_PTR;
-    }
-
-    printf("Registers:\r\n");
-
-    printf(" TEMPORARY\r\n");
-    for(int k=0; k<VM_REGISTERS; k++)
-    {
-        printf("  0x%02x: 0x%08x\r\n", k, registers->temp[k]);
-    }
-
-    printf("\r\n"
-           "PERSISTENT\r\n");
-    for(int k=0; k<VM_REGISTERS; k++)
-    {
-        printf("  0x%02x: 0x%08x\r\n", k, registers->pers[k]);
-    }
-    return VM_ERR_SUCCESS;
+    S_VM *vm = (S_VM*) calloc(sizeof(S_VM), 1);
+    return vm;
 }
 
 ERR_STATUS VM_ENGINE(S_VM *vm,
@@ -182,42 +34,70 @@ ERR_STATUS VM_ENGINE(S_VM *vm,
         return VM_ERR_PROG_NOT_FOUND;
     }
 
-    uint32_t pc = 0;
+    vm->sysRegs.programCounter = 0;
+    vm->sysRegs.stack.pointer = 0;
+
     ERR_STATUS vmErrCode = VM_ERR_SUCCESS;
     while(1)
     {
-        S_VMInstruction *instruction = (S_VMInstruction*) (program + pc);
+        S_VMInstruction *instruction = (S_VMInstruction*) (program + vm->sysRegs.programCounter);
 
         switch(instruction->code)
         {
         case INS_ADD:
             vmErrCode = VM_InstructionAdd(&instruction->args.math3Ops, &vm->regs);
-            pc += (uint16_t)(sizeof(instruction->code) + sizeof(S_InsMath3Ops));
+            vm->sysRegs.programCounter += (uint16_t)(sizeof(instruction->code) + sizeof(S_InsMath3Ops));
             break;
 
         case INS_SUB:
             vmErrCode = VM_InstructionSub(&instruction->args.math3Ops, &vm->regs);
-            pc += (uint16_t)(sizeof(instruction->code) + sizeof(S_InsMath3Ops));
+            vm->sysRegs.programCounter += (uint16_t)(sizeof(instruction->code) + sizeof(S_InsMath3Ops));
             break;
 
         case INS_MUL:
             vmErrCode = VM_InstructionMul(&instruction->args.math3Ops, &vm->regs);
-            pc += (uint16_t)(sizeof(instruction->code) + sizeof(S_InsMath3Ops));
+            vm->sysRegs.programCounter += (uint16_t)(sizeof(instruction->code) + sizeof(S_InsMath3Ops));
             break;
 
         case INS_DIV:
             vmErrCode = VM_InstructionDiv(&instruction->args.math3Ops, &vm->regs);
-            pc += (uint16_t)(sizeof(instruction->code) + sizeof(S_InsMath3Ops));
+            vm->sysRegs.programCounter += (uint16_t)(sizeof(instruction->code) + sizeof(S_InsMath3Ops));
             break;
 
         case INS_MOD:
             vmErrCode = VM_InstructionMod(&instruction->args.math3Ops, &vm->regs);
-            pc += (uint16_t)(sizeof(instruction->code) + sizeof(S_InsMath3Ops));
+            vm->sysRegs.programCounter += (uint16_t)(sizeof(instruction->code) + sizeof(S_InsMath3Ops));
+            break;
+
+        case INS_MOV:
+            vmErrCode = VM_InstructionMov(&instruction->args.math3Ops, &vm->regs);
+            vm->sysRegs.programCounter += (uint16_t)(sizeof(instruction->code) + sizeof(S_InsMath3Ops));
+            break;
+
+        case INS_PUSH:
+            vmErrCode = VM_InstructionPush(&vm->sysRegs.stack, &vm->regs,  &instruction->args.reg);
+            vm->sysRegs.programCounter += (uint16_t)(sizeof(instruction->code) + sizeof(S_InsReg));
+            break;
+
+        case INS_POP:
+            vmErrCode = VM_InstructionPop(&vm->sysRegs.stack, &vm->regs,  &instruction->args.reg);
+            vm->sysRegs.programCounter += (uint16_t)(sizeof(instruction->code) + sizeof(S_InsReg));
+            break;
+
+        case INS_CALL:
+            vm->sysRegs.programCounter += (uint16_t)(sizeof(instruction->code) + sizeof(S_InsProgCnt));
+            vmErrCode = VM_InstructionCall(&vm->sysRegs.programCounter, 
+                                            &vm->sysRegs.heap, 
+                                            &instruction->args.programCounter);
+            break;
+
+        case INS_RET:
+            vmErrCode = VM_InstructionRet(&vm->sysRegs.programCounter, &vm->sysRegs.heap);
             break;
 
         case INS_PRINT_REGS:
             vmErrCode = VM_InstructionPrintRegs(&vm->regs);
-            pc += (uint16_t)(sizeof(instruction->code));
+            vm->sysRegs.programCounter += (uint16_t)(sizeof(instruction->code));
             break;
 
         default:
@@ -232,16 +112,10 @@ ERR_STATUS VM_ENGINE(S_VM *vm,
     
     if(vmErrCode)
     {
-        printf("VM fail on pc: %u", pc);
+        printf("VM fail on pc: %u", vm->sysRegs.programCounter);
         return vmErrCode;
     }
 
     return VM_ERR_SUCCESS;
 }
 
-
-S_VM* VM_Init()
-{
-    S_VM *vm = (S_VM*) calloc(sizeof(S_VM), 1);
-    return vm;
-}
