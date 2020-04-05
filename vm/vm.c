@@ -102,6 +102,37 @@ static ERR_STATUS VM_InstructionDiv(S_InsMath3Ops *arguments, S_VMRegisters *reg
     return VM_ERR_SUCCESS;
 }
 
+static ERR_STATUS VM_InstructionMod(S_InsMath3Ops *arguments, S_VMRegisters *registers)
+{
+    if (arguments->regA >= VM_REGISTERS)
+    {
+        return VM_ERR_INS_ARG_OUT_OF_RANGE;
+    }
+
+    if (arguments->regB != 0xFF)
+    { //regB to regA
+        if (arguments->regB >= VM_REGISTERS)
+        {
+            return VM_ERR_INS_ARG_OUT_OF_RANGE;
+        }
+        if (registers->temp[arguments->regB] == 0)
+        {
+            return VM_ERR_MATH_DIV_BY_0;
+        }
+        *((int32_t *)&registers->temp[arguments->regA]) %= *((int32_t *)&registers->temp[arguments->regB]);
+    }
+    else
+    { //const value to regA
+        if (arguments->cnst == 0)
+        {
+            return VM_ERR_MATH_DIV_BY_0;
+        }
+        *((int32_t *)&registers->temp[arguments->regA]) %= arguments->cnst;
+    }
+
+    return VM_ERR_SUCCESS;
+}
+
 VM_InstructionPrintRegs(S_VMRegisters *registers)
 {
     if(registers == nullptr)
@@ -151,7 +182,7 @@ ERR_STATUS VM_ENGINE(S_VM *vm,
         return VM_ERR_PROG_NOT_FOUND;
     }
 
-    uint16_t pc = 0;
+    uint32_t pc = 0;
     ERR_STATUS vmErrCode = VM_ERR_SUCCESS;
     while(1)
     {
@@ -176,6 +207,11 @@ ERR_STATUS VM_ENGINE(S_VM *vm,
 
         case INS_DIV:
             vmErrCode = VM_InstructionDiv(&instruction->args.math3Ops, &vm->regs);
+            pc += (uint16_t)(sizeof(instruction->code) + sizeof(S_InsMath3Ops));
+            break;
+
+        case INS_MOD:
+            vmErrCode = VM_InstructionMod(&instruction->args.math3Ops, &vm->regs);
             pc += (uint16_t)(sizeof(instruction->code) + sizeof(S_InsMath3Ops));
             break;
 
