@@ -1,7 +1,7 @@
 import re
 
 class VMProgram(object):
-    from VMcompiler.vmInstructions import instructionsDict as _instructionsDict
+    from vmInstructions import instructionsDict as _instructionsDict
 
     def __init__(self, text: str):
         self.bProgram = bytearray()

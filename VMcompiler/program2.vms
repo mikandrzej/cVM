@@ -1,10 +1,10 @@
-#1234
+#1111
 
 dupa()
 call dupa
 ret
 
 dupa()
-mov 0, 0xFF, 24
+mov 0, 0xFF, 22
 printregs
 ret

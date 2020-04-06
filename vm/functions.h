@@ -7,6 +7,7 @@
 #define INS_CALL 0x11
 #define INS_PUSH 0x12
 #define INS_POP 0x13
+#define INS_RUN 0x14
 
 #define INS_JMP 0x20
 #define INS_JMPZ 0x21

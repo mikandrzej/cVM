@@ -1,8 +1,8 @@
-from VMcompiler.vmProgram import VMProgram
+from vmProgram import VMProgram
 
 class VMSource(object):
-    def __init__(self, inputPath: str, outputPath: str):
-        self.inputPath = inputPath
+    def __init__(self, inputPaths: list, outputPath: str):
+        self.inputPaths = inputPaths
         self.outputPath = outputPath
         self.bOutput = bytearray()
         self.programs = []
@@ -12,9 +12,10 @@ class VMSource(object):
 
     def _parsePrograms(self):
         programs = []
-        with open(self.inputPath) as f:
-            fileText = f.read()
-            programs.append(VMProgram(fileText))
+        for path in self.inputPaths:
+            with open(path) as f:
+                fileText = f.read()
+                programs.append(VMProgram(fileText))
 
         self.programs = programs
 

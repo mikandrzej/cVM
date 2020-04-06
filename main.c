@@ -41,5 +41,9 @@ int main()
               1234,
               0,
               0);
+    VM_ENGINE(vm,
+              1111,
+              0,
+              0);
     return 0;
 }

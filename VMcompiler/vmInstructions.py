@@ -59,6 +59,12 @@ instructionsDict = {
         "argumentTypes": [
             "uint8"
         ]},
+    "run": {
+        "code": 0x14,
+        "arguments": 1,
+        "argumentTypes": [
+            "uint16"
+        ]},
     "call": {
         "code": 0x11,
         "arguments": 1,
