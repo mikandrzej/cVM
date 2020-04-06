@@ -22,9 +22,6 @@ class VMProgram(object):
             elif parseRes == False:
                 raise Exception("Compilation failed.")
 
-            if type(parseRes) is bytearray:
-                self.bProgram.extend(parseRes)
-
         self.programLen = len(self.bProgram)
 
 
@@ -33,7 +30,7 @@ class VMProgram(object):
             return None
 
         if line[0] == '#':
-            self.programID = int(line[1:].strip(),0)
+            self.programID = int(line[1:].strip(), 0)
             return None
 
         if line.strip().endswith('()'):
@@ -51,19 +48,17 @@ class VMProgram(object):
         command = splittedLine[0].strip().lower()
         args = [x.strip() for x in splittedLine[1:]]
 
-        bArray = bytearray()
-
         commandDef = self._instructionsDict.get(command)
-        bCommandCode = bytes([commandDef.get("code")])
-        bArray.extend(bCommandCode)
+        bCommandCode = commandDef.get("code").to_bytes(1, byteorder='little')
+        self.bProgram.extend(bCommandCode)
 
         argsCntDef = commandDef.get("arguments")
         argsTypesDef = commandDef.get("argumentTypes")
         for x in range(argsCntDef):
             bArgument = self._parseArgument(argsTypesDef[x], args[x])
-            bArray.extend(bArgument)
+            self.bProgram.extend(bArgument)
 
-        return bArray
+        return True
 
     def _parseArgument(self, argType: str, arg: str):
         if argType == 'uint8':

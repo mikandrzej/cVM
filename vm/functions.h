@@ -36,5 +36,6 @@ ERR_STATUS VM_InstructionMov(S_InsMath3Ops *arguments, S_VMRegisters *registers)
 
 ERR_STATUS VM_InstructionJmp(uint32_t *actProgramCounter, S_VMHeap *heap, S_InsProgCnt *arguments);
 ERR_STATUS VM_InstructionRet(uint32_t *actProgramCounter, S_VMHeap *heap);
+ERR_STATUS VM_InstructionCall(uint32_t *actProgramCounter, S_VMHeap *heap, S_InsCall *arguments);
 
 ERR_STATUS VM_InstructionPrintRegs(S_VMRegisters *registers);

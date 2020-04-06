@@ -278,9 +278,9 @@ ERR_STATUS VM_InstructionRet(uint32_t *actProgramCounter, S_VMHeap *heap)
     {
         return VM_ERR_INVALID_PTR;
     }
-    if(heap->pointer < heap->pointer-1)
+    if(heap->pointer == 0)
     {
-        return VM_ERR_OVERFLOW;
+        return VM_ERR_APP_END;
     }
 
     heap->pointer--;
@@ -289,28 +289,29 @@ ERR_STATUS VM_InstructionRet(uint32_t *actProgramCounter, S_VMHeap *heap)
     return VM_ERR_SUCCESS;
 }
 
-ERR_STATUS VM_InstructionCall(S_VM *vm, S_InsCall *arguments)
+ERR_STATUS VM_InstructionCall(uint32_t *actProgramCounter, S_VMHeap *heap, S_InsCall *arguments)
 {
-    if(vm == nullptr)
+    if (actProgramCounter == nullptr)
     {
         return VM_ERR_INVALID_PTR;
     }
-    if(arguments == nullptr)
+    if (heap == nullptr)
     {
         return VM_ERR_INVALID_PTR;
     }
+    if (arguments == nullptr)
+    {
+        return VM_ERR_INVALID_PTR;
+    }
+    if (heap->pointer >= VM_HEAPSIZE - 1)
+    {
+        return VM_ERR_OVERFLOW;
+    }
 
-    uint16_t programOffset;
-    ERR_STATUS retval;
-
-    retval = VM_FindProgram(arguments->programID, vm, &programOffset);
-    RETURN_ON_ERROR(retval);
-
-    S_VMHeap *heap = &vm->sysRegs.heap;
-    heap->callCtx[heap->pointer].programCounter = vm->sysRegs.programCounter;
+    heap->callCtx[heap->pointer].programCounter = *actProgramCounter;
     heap->pointer++;
 
-    vm->sysRegs.programCounter = programOffset;
+    *actProgramCounter = arguments->pc;
 
     return VM_ERR_SUCCESS;
 }

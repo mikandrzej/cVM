@@ -5,7 +5,7 @@
             
             "type": "shell",
             "label": "gcc.exe build main.c",
-            "command": "C:\\Program Files (x86)\\CodeBlocks\\MinGW\\bin\\gcc.exe",
+            "command": "C:\\MinGW\\bin\\gcc.exe",
             "args": [
                 "-g",
                 "${workspaceFolder}\\main.c",
@@ -15,7 +15,7 @@
                 "${workspaceFolder}\\main.exe"
             ],
             "options": {
-                "cwd": "C:\\Program Files (x86)\\CodeBlocks\\MinGW\\bin"
+                "cwd": "C:\\MinGW\\bin"
             },
             "problemMatcher": [
                 "$gcc"

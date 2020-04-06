@@ -86,7 +86,7 @@ typedef struct {
 } S_InsReg;
 
 typedef struct {
-    PROGRAM_ID programID;
+    uint16_t pc;
 } S_InsCall;
 
 typedef struct {
