@@ -9,33 +9,61 @@ S_VM* VM_Init()
     return vm;
 }
 
+ERR_STATUS VM_FindProgram(PROGRAM_ID id, S_VM *vm, uint16_t *programOffset)
+{
+    if(vm == nullptr)
+    {
+        return VM_ERR_INVALID_PTR;
+    }
+    
+    ERR_STATUS retval = VM_ERR_PROG_NOT_FOUND;
+
+    S_VMProgramsList *VMProgramsList = (S_VMProgramsList *)(vm->VMData + vm->VMData->programsListOffset);
+
+    for(int k=0; k<VMProgramsList->programsCnt; k++)
+    {
+        if(VMProgramsList->program[k].id == id)
+        {
+            *programOffset = VMProgramsList->program[k].offset;
+            retval = VM_ERR_SUCCESS;
+        }
+    }
+
+    return retval;
+}
+
 ERR_STATUS VM_ENGINE(S_VM *vm,
                      PROGRAM_ID programID,
                      S_VMIOData *input,
                      S_VMIOData *output)
 {
-    uint8_t *basePointer = (uint8_t*)vm->VMData;
+    if(input == nullptr)
+    {
+        return VM_ERR_INVALID_PTR;
+    }
+    if(output == nullptr)
+    {
+        return VM_ERR_INVALID_PTR;
+    }
+
+    ERR_STATUS retval = VM_ERR_SUCCESS;
     S_VMProgramsList *VMProgramsList= nullptr;
-    S_VMProgram *VMProgram = nullptr;
+    uint16_t programOffset = 0;
+    uint8_t *basePointer = (uint8_t*)vm->VMData;
     uint8_t *program = nullptr;
 
-    VMProgramsList = (S_VMProgramsList *)(basePointer + vm->VMData->programsListOffset);
-    for(int k=0; k<VMProgramsList->programsCnt; k++)
-    {
-        if(VMProgramsList->program[k].id == programID)
-        {
-            program = (uint8_t *)(basePointer + VMProgramsList->program[k].offset);
-            break;
-        }
-    }
+    retval = VM_FindProgram(programID, vm, &programOffset);
+    RETURN_ON_ERROR(retval);
 
-    if (program == nullptr)
-    {
-        return VM_ERR_PROG_NOT_FOUND;
-    }
+    program = (uint8_t *) (programOffset + basePointer);
 
     vm->sysRegs.programCounter = 0;
     vm->sysRegs.stack.pointer = 0;
+
+    for(int k=0; k<VM_IO_DATA; k++)
+    {
+        vm->regs.temp[k] = input->io[k];
+    }
 
     ERR_STATUS vmErrCode = VM_ERR_SUCCESS;
     while(1)
@@ -84,9 +112,9 @@ ERR_STATUS VM_ENGINE(S_VM *vm,
             vm->sysRegs.programCounter += (uint16_t)(sizeof(instruction->code) + sizeof(S_InsReg));
             break;
 
-        case INS_CALL:
+        case INS_JMP:
             vm->sysRegs.programCounter += (uint16_t)(sizeof(instruction->code) + sizeof(S_InsProgCnt));
-            vmErrCode = VM_InstructionCall(&vm->sysRegs.programCounter, 
+            vmErrCode = VM_InstructionJmp(&vm->sysRegs.programCounter, 
                                             &vm->sysRegs.heap, 
                                             &instruction->args.programCounter);
             break;
@@ -114,6 +142,11 @@ ERR_STATUS VM_ENGINE(S_VM *vm,
     {
         printf("VM fail on pc: %u", vm->sysRegs.programCounter);
         return vmErrCode;
+    }
+
+    for(int k=0; k<VM_IO_DATA; k++)
+    {
+        output->io[k] = vm->regs.temp[k];
     }
 
     return VM_ERR_SUCCESS;

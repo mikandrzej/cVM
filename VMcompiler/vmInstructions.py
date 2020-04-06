@@ -63,7 +63,7 @@ instructionsDict = {
         "code": 0x11,
         "arguments": 1,
         "argumentTypes": [
-            "uint32"
+            "funcName"
         ]},
     "ret": {
         "code": 0x10,

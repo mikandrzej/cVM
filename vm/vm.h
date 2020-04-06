@@ -86,6 +86,10 @@ typedef struct {
 } S_InsReg;
 
 typedef struct {
+    PROGRAM_ID programID;
+} S_InsCall;
+
+typedef struct {
     uint8_t programCounter;
 } S_InsProgCnt;
 
@@ -95,6 +99,7 @@ typedef union{
     S_InsMath3Ops math3Ops;
     S_InsReg reg;
     S_InsProgCnt programCounter;
+    S_InsCall call;
 } U_InsArgs;
 
 typedef struct {
@@ -104,6 +109,8 @@ typedef struct {
 
 
 #pragma pack(pop)
+
+ERR_STATUS VM_FindProgram(PROGRAM_ID id, S_VM *vm, uint16_t *programOffset);
 ERR_STATUS VM_ENGINE(S_VM *vm,
                      PROGRAM_ID programID,
                      S_VMIOData *input,

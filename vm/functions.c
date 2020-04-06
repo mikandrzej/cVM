@@ -239,7 +239,7 @@ ERR_STATUS VM_InstructionMov(S_InsMath3Ops *arguments, S_VMRegisters *registers)
     return VM_ERR_SUCCESS;
 }
 
-ERR_STATUS VM_InstructionCall(uint32_t *actProgramCounter, S_VMHeap *heap, S_InsProgCnt *arguments)
+ERR_STATUS VM_InstructionJmp(uint32_t *actProgramCounter, S_VMHeap *heap, S_InsProgCnt *arguments)
 {
     if(actProgramCounter == nullptr)
     {
@@ -285,6 +285,32 @@ ERR_STATUS VM_InstructionRet(uint32_t *actProgramCounter, S_VMHeap *heap)
 
     heap->pointer--;
     *actProgramCounter = heap->callCtx[heap->pointer].programCounter;
+
+    return VM_ERR_SUCCESS;
+}
+
+ERR_STATUS VM_InstructionCall(S_VM *vm, S_InsCall *arguments)
+{
+    if(vm == nullptr)
+    {
+        return VM_ERR_INVALID_PTR;
+    }
+    if(arguments == nullptr)
+    {
+        return VM_ERR_INVALID_PTR;
+    }
+
+    uint16_t programOffset;
+    ERR_STATUS retval;
+
+    retval = VM_FindProgram(arguments->programID, vm, &programOffset);
+    RETURN_ON_ERROR(retval);
+
+    S_VMHeap *heap = &vm->sysRegs.heap;
+    heap->callCtx[heap->pointer].programCounter = vm->sysRegs.programCounter;
+    heap->pointer++;
+
+    vm->sysRegs.programCounter = programOffset;
 
     return VM_ERR_SUCCESS;
 }

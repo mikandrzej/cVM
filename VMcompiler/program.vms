@@ -1,4 +1,7 @@
 #1234
+
+dupa()
+
 mov 0, 0xFF, 0x11
 mov 1, 0xFF, 0x22
 mov 2, 0xFF, 0x33
@@ -14,4 +17,6 @@ pop 8
 pop 7
 pop 6
 pop 5
+call dupa
 printregs
+dupa()
