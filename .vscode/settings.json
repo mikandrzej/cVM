@@ -2,6 +2,9 @@
     "files.associations": {
         "vm.h": "c",
         "stdint.h": "c",
-        "errors.h": "c"
+        "errors.h": "c",
+        "stdlib.h": "c",
+        "stdio.h": "c",
+        "functions.h": "c"
     }
 }
