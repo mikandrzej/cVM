@@ -1,17 +1,11 @@
 #1234
-mov 0, 0xFF, 0x11
-mov 1, 0xFF, 0x22
-mov 2, 0xFF, 0x33
-mov 3, 0xFF, 0x44
-mov 4, 0xFF, 0x55
-push 0
-push 1
-push 2
-push 3
-push 4
-pop 9
-pop 8
-pop 7
-pop 6
-pop 5
+
+dupa()
+call dupa
+mov 0, 0xFF, 12
 printregs
+
+dupa()
+mov 0, 0xFF, 24
+printregs
+ret

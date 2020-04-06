@@ -239,7 +239,7 @@ ERR_STATUS VM_InstructionMov(S_InsMath3Ops *arguments, S_VMRegisters *registers)
     return VM_ERR_SUCCESS;
 }
 
-ERR_STATUS VM_InstructionCall(uint32_t *actProgramCounter, S_VMHeap *heap, S_InsProgCnt *arguments)
+ERR_STATUS VM_InstructionJmp(uint32_t *actProgramCounter, S_VMHeap *heap, S_InsProgCnt *arguments)
 {
     if(actProgramCounter == nullptr)
     {
@@ -278,13 +278,40 @@ ERR_STATUS VM_InstructionRet(uint32_t *actProgramCounter, S_VMHeap *heap)
     {
         return VM_ERR_INVALID_PTR;
     }
-    if(heap->pointer < heap->pointer-1)
+    if(heap->pointer == 0)
     {
-        return VM_ERR_OVERFLOW;
+        return VM_ERR_APP_END;
     }
 
     heap->pointer--;
     *actProgramCounter = heap->callCtx[heap->pointer].programCounter;
+
+    return VM_ERR_SUCCESS;
+}
+
+ERR_STATUS VM_InstructionCall(uint32_t *actProgramCounter, S_VMHeap *heap, S_InsCall *arguments)
+{
+    if (actProgramCounter == nullptr)
+    {
+        return VM_ERR_INVALID_PTR;
+    }
+    if (heap == nullptr)
+    {
+        return VM_ERR_INVALID_PTR;
+    }
+    if (arguments == nullptr)
+    {
+        return VM_ERR_INVALID_PTR;
+    }
+    if (heap->pointer >= VM_HEAPSIZE - 1)
+    {
+        return VM_ERR_OVERFLOW;
+    }
+
+    heap->callCtx[heap->pointer].programCounter = *actProgramCounter;
+    heap->pointer++;
+
+    *actProgramCounter = arguments->pc;
 
     return VM_ERR_SUCCESS;
 }

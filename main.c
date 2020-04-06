@@ -29,7 +29,7 @@ uint8_t data[] = {
 
 int main()
 {
-    FILE *file_data = fopen("C:\\Users\\Miki\\Documents\\cb\\cVM\\VMcompiler\\compiled.bin", "rb");
+    FILE *file_data = fopen("C:\\Miki\\priv\\Repos\\cVM\\VMcompiler\\compiled.bin", "rb");
     uint8_t data[VM_BUFFER_SIZE];
     memset(data, 0, sizeof(data));
 
@@ -41,7 +41,5 @@ int main()
               1234,
               0,
               0);
-
-    printf("Hello world!\n");
     return 0;
 }

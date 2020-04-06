@@ -5,17 +5,17 @@
             
             "type": "shell",
             "label": "gcc.exe build main.c",
-            "command": "C:\\Strawberry\\c\\bin\\gcc.exe",
+            "command": "C:\\MinGW\\bin\\gcc.exe",
             "args": [
                 "-g",
                 "${workspaceFolder}\\main.c",
                 "-g",
-                "${workspaceFolder}\\vm\\vm.c",
+                "${workspaceFolder}\\vm\\*.c",
                 "-o",
                 "${workspaceFolder}\\main.exe"
             ],
             "options": {
-                "cwd": "C:\\Strawberry\\c\\bin"
+                "cwd": "C:\\MinGW\\bin"
             },
             "problemMatcher": [
                 "$gcc"
