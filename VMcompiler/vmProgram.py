@@ -83,7 +83,7 @@ class VMProgram(object):
             self.calls.update({
                 len(self.bProgram) : arg
             })
-            return int('0').to_bytes(2, byteorder='little')
+            return int('0').to_bytes(4, byteorder='little')
 
     def _validateLine(self, line: str):
         if line.strip() == '':
@@ -109,7 +109,7 @@ class VMProgram(object):
     def _replaceCallsOffsets(self):
         for callOffset, funcName in self.calls.items():
             offset = self.functions.get(funcName)
-            offset = offset.to_bytes(2, byteorder='little')
+            offset = offset.to_bytes(4, byteorder='little')
             _replaceInByteArray(self.bProgram, callOffset, offset)
 
 def _replaceInByteArray(barr: bytearray, pos: int, src: bytearray):
